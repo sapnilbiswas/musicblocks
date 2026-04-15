@@ -263,7 +263,7 @@ class HelpWidget {
 
                         // body = body + '<p><img src="' + path + "/" + name + '_block.svg"></p>';
                         const imageSrc = `Docs/${path}/${name}_block.svg`;
-                        body += `<figure style="width:100%;"><img style="max-width:100%;" src=${imageSrc}></figure>`;
+                        body += `<figure style="width:100%;"><img style="max-width:100%;" src="${imageSrc}"></figure>`;
                     }
 
                     body += `<p>${message[0]}</p>`;
