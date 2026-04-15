@@ -253,20 +253,21 @@ class WidgetWindow {
         this._body = this._create("div", "wfWinBody", this._frame);
         this._toolbar = this._create("div", "wfbToolbar", this._body);
 
-        const disableScroll = () => {
-            // Get the current page scroll position
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-            // if any scroll is attempted,
-            // set this to the previous value
-            window.onscroll = () => {
-                window.scrollTo(scrollLeft, scrollTop);
-            };
+        this._disableScroll = (e) => {
+            e.stopPropagation();
+            if (e.cancelable) {
+                e.preventDefault();
+            }
+            const deltaY = e.deltaY !== undefined ? e.deltaY : (e.detail ? e.detail * 40 : 0);
+            const deltaX = e.deltaX !== undefined ? e.deltaX : 0;
+            
+            if (deltaY !== 0) this._widget.scrollTop += deltaY;
+            if (deltaX !== 0) this._widget.scrollLeft += deltaX;
         };
 
         this._widget = this._create("div", "wfbWidget", this._body);
-        this._widget.addEventListener("wheel", disableScroll, false);
-        this._widget.addEventListener("DOMMouseScroll", disableScroll, false);
+        this._widget.addEventListener("wheel", this._disableScroll, { passive: false });
+        this._widget.addEventListener("DOMMouseScroll", this._disableScroll, { passive: false });
     }
 
     /**
@@ -630,10 +631,10 @@ class WidgetWindow {
         if (this._docMouseDownHandler) {
             document.removeEventListener("mousedown", this._docMouseDownHandler, true);
         }
-        // Clear the scroll lock that may have been set by the disableScroll
-        // handler in _createUIelements(). Without this, window.onscroll remains
-        // permanently overridden after the widget is closed, freezing page scroll.
-        window.onscroll = null;
+        if (this._widget && this._disableScroll) {
+            this._widget.removeEventListener("wheel", this._disableScroll);
+            this._widget.removeEventListener("DOMMouseScroll", this._disableScroll);
+        }
         if (this._frame && this._frame.parentElement) {
             this._frame.parentElement.removeChild(this._frame);
         }
