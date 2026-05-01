@@ -1163,7 +1163,7 @@ class RhythmRuler {
             }
         } else {
             let inputNum = this._dissectNumber.value;
-            if (inputNum === "" || isNaN(inputNum)) {
+            if (inputNum === "" || isNaN(inputNum) || Math.abs(Math.floor(inputNum)) === 0) {
                 inputNum = 2;
             } else {
                 inputNum = Math.abs(Math.floor(inputNum));
@@ -1246,7 +1246,7 @@ class RhythmRuler {
 
             // convert times into cells here.
             let inputNum = this._dissectNumber.value;
-            if (inputNum === "" || isNaN(inputNum)) {
+            if (inputNum === "" || isNaN(inputNum) || Math.abs(Math.floor(inputNum)) === 0) {
                 inputNum = 2;
             } else {
                 inputNum = Math.abs(Math.floor(inputNum));
@@ -3327,7 +3327,7 @@ class RhythmRuler {
         const ruler = this._rulers[down.rulerIndex];
         if (ruler && ruler.cells[down.cellIndex]) {
             let inputNum = this._dissectNumber.value;
-            if (inputNum === "" || isNaN(inputNum)) {
+            if (inputNum === "" || isNaN(inputNum) || Math.abs(Math.floor(inputNum)) === 0) {
                 inputNum = 2;
             } else {
                 inputNum = Math.abs(Math.floor(inputNum));
