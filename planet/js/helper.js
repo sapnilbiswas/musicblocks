@@ -151,3 +151,16 @@ $(document).ready(() => {
         toggleText("view-more-chips", showMore, showLess);
     });
 });
+
+if (typeof module !== "undefined" && module.exports) {
+    module.exports = {
+        debounce,
+        getCookie,
+        setCookie,
+        toggleSearch,
+        toggleText,
+        toggleExpandable,
+        hideOnClickOutside,
+        updateCheckboxes
+    };
+}
