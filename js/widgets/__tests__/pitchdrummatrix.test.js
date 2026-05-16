@@ -225,5 +225,129 @@ describe("PitchDrumMatrix Widget", () => {
             // _save_lock is set in init, not constructor
             expect(pdm._save_lock).toBeUndefined();
         });
+
+        test("_get_save_lock returns current lock state", () => {
+            pdm._save_lock = false;
+            expect(pdm._get_save_lock()).toBe(false);
+            pdm._save_lock = true;
+            expect(pdm._get_save_lock()).toBe(true);
+        });
+    });
+
+    // --- clearBlocks Tests ---
+    describe("clearBlocks", () => {
+        test("should clear both row and column blocks", () => {
+            pdm._rowBlocks = [1, 2, 3];
+            pdm._colBlocks = [4, 5, 6];
+            pdm.clearBlocks();
+            expect(pdm._rowBlocks).toEqual([]);
+            expect(pdm._colBlocks).toEqual([]);
+        });
+
+        test("should work when arrays are already empty", () => {
+            pdm.clearBlocks();
+            expect(pdm._rowBlocks).toEqual([]);
+            expect(pdm._colBlocks).toEqual([]);
+        });
+    });
+
+    // --- addRowBlock Tests ---
+    describe("addRowBlock", () => {
+        test("should add a pitch block to _rowBlocks", () => {
+            pdm.addRowBlock(10);
+            expect(pdm._rowBlocks).toEqual([10]);
+        });
+
+        test("should accumulate multiple pitch blocks", () => {
+            pdm.addRowBlock(10);
+            pdm.addRowBlock(20);
+            pdm.addRowBlock(30);
+            expect(pdm._rowBlocks).toEqual([10, 20, 30]);
+        });
+    });
+
+    // --- addColBlock Tests ---
+    describe("addColBlock", () => {
+        test("should add a drum block to _colBlocks", () => {
+            pdm.addColBlock(40);
+            expect(pdm._colBlocks).toEqual([40]);
+        });
+
+        test("should accumulate multiple drum blocks", () => {
+            pdm.addColBlock(40);
+            pdm.addColBlock(50);
+            expect(pdm._colBlocks).toEqual([40, 50]);
+        });
+    });
+
+    // --- addNode Tests ---
+    describe("addNode", () => {
+        test("should add a pitch-drum mapping to _blockMap", () => {
+            pdm.addNode(1, 2);
+            expect(pdm._blockMap).toEqual([[1, 2]]);
+        });
+
+        test("should not add duplicate nodes", () => {
+            pdm.addNode(1, 2);
+            pdm.addNode(1, 2);
+            expect(pdm._blockMap).toEqual([[1, 2]]);
+        });
+
+        test("should add different pitch-drum combinations", () => {
+            pdm.addNode(1, 2);
+            pdm.addNode(1, 3);
+            pdm.addNode(2, 2);
+            expect(pdm._blockMap).toHaveLength(3);
+        });
+
+        test("should allow same pitch with different drums", () => {
+            pdm.addNode(5, 10);
+            pdm.addNode(5, 20);
+            expect(pdm._blockMap).toEqual([
+                [5, 10],
+                [5, 20]
+            ]);
+        });
+    });
+
+    // --- removeNode Tests ---
+    describe("removeNode", () => {
+        test("should mark a node as removed with [-1, -1]", () => {
+            pdm.addNode(1, 2);
+            pdm.removeNode(1, 2);
+            expect(pdm._blockMap).toEqual([[-1, -1]]);
+        });
+
+        test("should not affect other nodes", () => {
+            pdm.addNode(1, 2);
+            pdm.addNode(3, 4);
+            pdm.removeNode(1, 2);
+            expect(pdm._blockMap).toEqual([
+                [-1, -1],
+                [3, 4]
+            ]);
+        });
+
+        test("should do nothing if node does not exist", () => {
+            pdm.addNode(1, 2);
+            pdm.removeNode(5, 6);
+            expect(pdm._blockMap).toEqual([[1, 2]]);
+        });
+
+        test("should handle removing from empty blockMap", () => {
+            pdm.removeNode(1, 2);
+            expect(pdm._blockMap).toEqual([]);
+        });
+
+        test("add then remove then re-add should create new entry", () => {
+            pdm.addNode(1, 2);
+            pdm.removeNode(1, 2);
+            // addNode checks for exact match [1,2], but the entry is now [-1,-1]
+            // so adding again should create a new entry
+            pdm.addNode(1, 2);
+            expect(pdm._blockMap).toHaveLength(2);
+            expect(pdm._blockMap[0]).toEqual([-1, -1]);
+            expect(pdm._blockMap[1]).toEqual([1, 2]);
+        });
     });
 });
