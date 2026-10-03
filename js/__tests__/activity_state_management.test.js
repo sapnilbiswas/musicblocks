@@ -579,4 +579,26 @@ describe("_initIdleWatcher isMusicPlaying check", () => {
         expect(correctCheck).toBe(false);
         expect(mockTurtles.running).toHaveBeenCalledTimes(1);
     });
+
+    it("should iterate Object.keys on palettes and blockList in sendAllToTrash and pasteBlocks", () => {
+        const hideMenu = jest.fn();
+        const mockPalettes = { dict: { rhythm: { hideMenu } } };
+        const mockBlocks = {
+            blockList: { b1: { connections: [null] } },
+            _beginDeferCheckBounds: jest.fn(),
+            captureStackPreview: jest.fn()
+        };
+        const palettesList = Object.keys(mockPalettes.dict);
+        const blocksList = Object.keys(mockBlocks.blockList);
+
+        for (const name of palettesList) {
+            mockPalettes.dict[name].hideMenu(true);
+        }
+        for (const blk of blocksList) {
+            mockBlocks.captureStackPreview(blk);
+        }
+
+        expect(hideMenu).toHaveBeenCalledWith(true);
+        expect(mockBlocks.captureStackPreview).toHaveBeenCalledWith("b1");
+    });
 });
