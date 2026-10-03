@@ -45,22 +45,19 @@ const loadFixtureProject = fixtureName => {
     cy.get("#errorText").should("not.be.visible");
 };
 
-// ModeWidget.init() calls window.widgetWindows.windowFor(this, "custom mode"),
-// which sets aria-label="custom mode" on the .windowFrame div.  We scope by
-// the title text for the wait and use the role+label selector for assertions.
+// ModeWidget.init() creates #modeWidgetWheelDiv inside the widget frame.
+// The title text and aria-label are dynamically updated to the active mode
+// name (e.g. "C major"), so we scope and wait by the container element.
 const openModeWidget = () => {
     loadFixtureProject("mode-widget-minimal.tb");
     cy.get("#play").click();
-    // Wait for the title bar to contain "custom mode" -- this is the most
-    // reliable signal that the widget body has been added to the DOM, matching
-    // the pattern used by mode-persistence.cy.js's waitForProjectLoaded guard.
-    cy.get(".windowFrame .wftTitle", { timeout: 30000 })
-        .should("be.visible")
-        .and("contain.text", "custom mode");
+    // Wait for the mode widget wheel container to be visible -- this is the most
+    // reliable signal that the widget body has been added to the DOM.
+    cy.get("#modeWidgetWheelDiv", { timeout: 30000 }).should("be.visible");
 };
 
 // Scoped selector for all assertions after the widget is confirmed open.
-const modeFrame = () => cy.get('.windowFrame[aria-label="custom mode"]');
+const modeFrame = () => cy.get("#modeWidgetWheelDiv").closest(".windowFrame");
 
 // ---------------------------------------------------------------------------
 // Suite
@@ -165,9 +162,6 @@ describe("Mode widget", () => {
         // and call widgetWindow.destroy() -- removing the .windowFrame from the
         // DOM entirely.
         modeFrame().find('[role="button"][aria-label="Close window"]').click({ force: true });
-
-        // The widget frame must be gone.
-        cy.get('.windowFrame[aria-label="custom mode"]').should("not.exist");
 
         // The mode wheel and table must also be gone.
         cy.get("#modeWidgetWheelDiv").should("not.exist");
